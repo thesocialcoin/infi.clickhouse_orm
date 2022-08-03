@@ -129,11 +129,14 @@ class Database(object):
         # Version 19.0 and above support LowCardinality
         self.has_low_cardinality_support = self.server_version >= (19, 0)
 
-    def create_database(self):
+    def create_database(self, on_cluster=None):
         '''
         Creates the database on the ClickHouse server if it does not already exist.
         '''
-        self._send('CREATE DATABASE IF NOT EXISTS `%s`' % self.db_name)
+        query = 'CREATE DATABASE IF NOT EXISTS `%s`' % self.db_name
+        if on_cluster:
+            query = '%s ON CLUSTER `%s`' % (query, on_cluster)
+        self._send(query)
         self.db_exists = True
 
     def drop_database(self):

@@ -265,6 +265,8 @@ class Model(metaclass=ModelBase):
 
     engine = None
 
+    on_cluster = None
+
     # Insert operations are restricted for read only models
     _readonly = False
 
@@ -352,7 +354,16 @@ class Model(metaclass=ModelBase):
         '''
         Returns the SQL statement for creating a table for this model.
         '''
-        parts = ['CREATE TABLE IF NOT EXISTS `%s`.`%s` (' % (db.db_name, cls.table_name())]
+ 
+        create = 'CREATE TABLE IF NOT EXISTS `%s`.`%s`' % (db.db_name, cls.table_name())
+
+        if cls.on_cluster:
+            create += ' ON CLUSTER `%s`' % cls.on_cluster
+
+        create += ' ('
+
+        parts = [create]
+
         # Fields
         items = []
         for name, field in cls.fields().items():
