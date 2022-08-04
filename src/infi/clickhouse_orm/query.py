@@ -308,6 +308,7 @@ class QuerySet(object):
         self._final = False
         self._array_join = None
         self._left_array_join = False
+        self._grouping_sets = None
 
     def __iter__(self):
         """
@@ -395,7 +396,14 @@ class QuerySet(object):
         if self._where_q and not self._where_q.is_empty:
             sql += '\nWHERE ' + self.conditions_as_sql(prewhere=False)
 
-        if self._grouping_fields:
+        if self._grouping_sets is not None:
+            sql += '\nGROUP BY\n  GROUPING SETS\n('
+            sql += ',\n'.join([
+                '(%s)'  % comma_join('`%s`' % field for field in grouping_set)
+                for grouping_set in self._grouping_sets
+            ])
+            sql += '\n)'
+        elif self._grouping_fields:
             sql += '\nGROUP BY %s' % comma_join('`%s`' % field for field in self._grouping_fields)
 
             if self._grouping_with_totals:
@@ -703,6 +711,11 @@ class AggregateQuerySet(QuerySet):
 
     def _verify_mutation_allowed(self):
         raise AssertionError('Cannot mutate an AggregateQuerySet')
+
+    def with_grouping_sets(self, grouping_sets):
+        qs = copy(self)
+        qs._grouping_sets = grouping_sets
+        return qs
 
 
 # Expose only relevant classes in import *
