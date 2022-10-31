@@ -63,3 +63,4 @@ cover/
 
 # tox
 .tox/
+.DS_Store
