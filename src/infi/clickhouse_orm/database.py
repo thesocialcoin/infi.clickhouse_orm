@@ -139,11 +139,15 @@ class Database(object):
         self._send(query)
         self.db_exists = True
 
-    def drop_database(self):
+    def drop_database(self, on_cluster=None):
         '''
         Deletes the database on the ClickHouse server.
         '''
-        self._send('DROP DATABASE `%s`' % self.db_name)
+        query = 'DROP DATABASE `%s`' % self.db_name
+        if on_cluster:
+            query = '%s ON CLUSTER `%s`' % (query, on_cluster)
+        query = '%s SYNC' % query
+        self._send(query)
         self.db_exists = False
 
     def create_table(self, model_class):
