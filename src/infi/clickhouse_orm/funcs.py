@@ -845,6 +845,11 @@ class F(Cond, FunctionOperatorsMixin, metaclass=FMeta):
 
     @staticmethod
     @with_utf8_support
+    def multiSearchAnyCaseInsensitive(haystack, needles):
+        return F('multiSearchAnyCaseInsensitive', haystack, needles)
+
+    @staticmethod
+    @with_utf8_support
     def position(haystack, needle):
         return F('position', haystack, needle)
 
